@@ -1,0 +1,341 @@
+{
+  "name": "sleepwalker",
+  "displayName": "Sleepwalker",
+  "description": "%extension.description%",
+  "version": "0.1.2",
+  "publisher": "safira-moraes",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#16142b",
+    "theme": "dark"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "claude code",
+    "keep awake",
+    "lid",
+    "sleep",
+    "caffeine",
+    "laptop"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "extensionKind": [
+    "ui"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "l10n": "./l10n",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sleepwalker",
+          "title": "Sleepwalker",
+          "icon": "media/activitybar.svg"
+        }
+      ]
+    },
+    "views": {
+      "sleepwalker": [
+        {
+          "type": "webview",
+          "id": "sleepwalker.panel",
+          "name": "%view.name%"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "sleepwalker.start",
+        "title": "%command.start%",
+        "category": "Sleepwalker",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "sleepwalker.startUntilReturn",
+        "title": "%command.startUntilReturn%",
+        "category": "Sleepwalker"
+      },
+      {
+        "command": "sleepwalker.startWhileAgent",
+        "title": "%command.startWhileAgent%",
+        "category": "Sleepwalker"
+      },
+      {
+        "command": "sleepwalker.startTimer",
+        "title": "%command.startTimer%",
+        "category": "Sleepwalker"
+      },
+      {
+        "command": "sleepwalker.stop",
+        "title": "%command.stop%",
+        "category": "Sleepwalker",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "sleepwalker.toggle",
+        "title": "%command.toggle%",
+        "category": "Sleepwalker"
+      },
+      {
+        "command": "sleepwalker.configureEmail",
+        "title": "%command.configureEmail%",
+        "category": "Sleepwalker",
+        "icon": "$(mail)"
+      },
+      {
+        "command": "sleepwalker.testEmail",
+        "title": "%command.testEmail%",
+        "category": "Sleepwalker"
+      },
+      {
+        "command": "sleepwalker.showLog",
+        "title": "%command.showLog%",
+        "category": "Sleepwalker",
+        "icon": "$(output)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "sleepwalker.configureEmail",
+          "when": "view == sleepwalker.panel",
+          "group": "navigation@1"
+        },
+        {
+          "command": "sleepwalker.showLog",
+          "when": "view == sleepwalker.panel",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "sleepwalker.stop",
+          "when": "sleepwalker.active"
+        },
+        {
+          "command": "sleepwalker.start",
+          "when": "!sleepwalker.active"
+        },
+        {
+          "command": "sleepwalker.startUntilReturn",
+          "when": "!sleepwalker.active"
+        },
+        {
+          "command": "sleepwalker.startWhileAgent",
+          "when": "!sleepwalker.active"
+        },
+        {
+          "command": "sleepwalker.startTimer",
+          "when": "!sleepwalker.active"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Sleepwalker",
+      "properties": {
+        "sleepwalker.lockScreen": {
+          "type": "boolean",
+          "default": true,
+          "order": 1,
+          "markdownDescription": "%config.lockScreen%"
+        },
+        "sleepwalker.turnOffDisplay": {
+          "type": "boolean",
+          "default": true,
+          "order": 2,
+          "markdownDescription": "%config.turnOffDisplay%"
+        },
+        "sleepwalker.displayOffDelaySeconds": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 60,
+          "order": 3,
+          "markdownDescription": "%config.displayOffDelaySeconds%"
+        },
+        "sleepwalker.returnGraceSeconds": {
+          "type": "number",
+          "default": 10,
+          "minimum": 2,
+          "maximum": 120,
+          "order": 4,
+          "markdownDescription": "%config.returnGraceSeconds%"
+        },
+        "sleepwalker.endAction": {
+          "type": "string",
+          "enum": [
+            "sleep",
+            "hibernate",
+            "none"
+          ],
+          "enumDescriptions": [
+            "%config.endAction.sleep%",
+            "%config.endAction.hibernate%",
+            "%config.endAction.none%"
+          ],
+          "default": "sleep",
+          "order": 5,
+          "markdownDescription": "%config.endAction%"
+        },
+        "sleepwalker.maxHours": {
+          "type": "number",
+          "default": 8,
+          "minimum": 0.25,
+          "maximum": 48,
+          "order": 6,
+          "markdownDescription": "%config.maxHours%"
+        },
+        "sleepwalker.agent.idleMinutes": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0.5,
+          "maximum": 120,
+          "order": 10,
+          "markdownDescription": "%config.agent.idleMinutes%"
+        },
+        "sleepwalker.agent.watchTerminals": {
+          "type": "boolean",
+          "default": true,
+          "order": 11,
+          "markdownDescription": "%config.agent.watchTerminals%"
+        },
+        "sleepwalker.agent.watchProcesses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "claude",
+            "codex",
+            "aider",
+            "gemini",
+            "opencode",
+            "goose",
+            "cursor-agent",
+            "copilot"
+          ],
+          "order": 12,
+          "markdownDescription": "%config.agent.watchProcesses%"
+        },
+        "sleepwalker.agent.cpuThresholdPercent": {
+          "type": "number",
+          "default": 5,
+          "minimum": 0.5,
+          "maximum": 100,
+          "order": 13,
+          "markdownDescription": "%config.agent.cpuThresholdPercent%"
+        },
+        "sleepwalker.guardrails.minBatteryPercent": {
+          "type": "number",
+          "default": 15,
+          "minimum": 0,
+          "maximum": 90,
+          "order": 20,
+          "markdownDescription": "%config.guardrails.minBatteryPercent%"
+        },
+        "sleepwalker.guardrails.maxTemperatureC": {
+          "type": "number",
+          "default": 90,
+          "minimum": 0,
+          "maximum": 110,
+          "order": 21,
+          "markdownDescription": "%config.guardrails.maxTemperatureC%"
+        },
+        "sleepwalker.email.enabled": {
+          "type": "boolean",
+          "default": false,
+          "order": 30,
+          "markdownDescription": "%config.email.enabled%"
+        },
+        "sleepwalker.email.to": {
+          "type": "string",
+          "default": "",
+          "order": 31,
+          "markdownDescription": "%config.email.to%"
+        },
+        "sleepwalker.email.from": {
+          "type": "string",
+          "default": "",
+          "order": 32,
+          "markdownDescription": "%config.email.from%"
+        },
+        "sleepwalker.email.smtpHost": {
+          "type": "string",
+          "default": "",
+          "order": 33,
+          "markdownDescription": "%config.email.smtpHost%"
+        },
+        "sleepwalker.email.smtpPort": {
+          "type": "number",
+          "default": 587,
+          "order": 34,
+          "markdownDescription": "%config.email.smtpPort%"
+        },
+        "sleepwalker.email.smtpSecure": {
+          "type": "boolean",
+          "default": false,
+          "order": 35,
+          "markdownDescription": "%config.email.smtpSecure%"
+        },
+        "sleepwalker.email.smtpUser": {
+          "type": "string",
+          "default": "",
+          "order": 36,
+          "markdownDescription": "%config.email.smtpUser%"
+        },
+        "sleepwalker.email.events": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "started",
+              "agentFinished",
+              "timerEnded",
+              "guardrail",
+              "warning",
+              "returned"
+            ]
+          },
+          "uniqueItems": true,
+          "default": [
+            "agentFinished",
+            "timerEnded",
+            "guardrail",
+            "warning"
+          ],
+          "order": 37,
+          "markdownDescription": "%config.email.events%"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "tsc -p tsconfig.test.json && node --test out-test/test/*.test.js",
+    "package": "npm run typecheck && npm run build -- --production && vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build -- --production"
+  },
+  "dependencies": {
+    "nodemailer": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/nodemailer": "^8.0.2",
+    "@types/vscode": "1.93.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.9.3"
+  }
+}

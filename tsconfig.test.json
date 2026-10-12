@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "out-test",
+    "noUnusedLocals": false
+  },
+  "include": ["src/test", "src/core"]
+}

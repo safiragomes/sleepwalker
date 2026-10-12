@@ -1,0 +1,971 @@
+/*
+ * Sleepwalker panel.
+ * Everything follows the VS Code theme except the "night window" at the top,
+ * which keeps its own colors in every theme: it is a picture, not chrome.
+ */
+
+:root {
+  --night: #1b1836;
+  --night-deep: #131127;
+  --night-line: #2c2856;
+  --moon: #f2d98a;
+  --star: #cfc8ff;
+  --glow: #9b8cff;
+  --metal: #3a3566;
+  --metal-edge: #4d4785;
+  --screen-on: #3a3478;
+  --screen-off: #17152e;
+
+  --fg: var(--vscode-foreground);
+  --muted: var(--vscode-descriptionForeground);
+  --border: var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.25)));
+  --surface: var(--vscode-sideBarSectionHeader-background, rgba(128, 128, 128, 0.08));
+  --focus: var(--vscode-focusBorder);
+  --accent: var(--vscode-button-background);
+  --accent-fg: var(--vscode-button-foreground);
+  --ok: var(--vscode-charts-green, #3fa66b);
+  --warn: var(--vscode-charts-yellow, #d0a215);
+  --bad: var(--vscode-charts-red, #d0493f);
+  --violet: var(--vscode-charts-purple, #9b8cff);
+
+  --radius-lg: 10px;
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--fg);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+  line-height: 1.45;
+  background: transparent;
+}
+
+#app {
+  padding: 12px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 520px;
+}
+
+/* Sections below the night window keep the same rhythm as #app. */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Night window                                                         */
+/* ------------------------------------------------------------------ */
+
+.night {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--night);
+  overflow: hidden;
+  aspect-ratio: 2 / 1;
+  max-height: 168px;
+  width: 100%;
+  perspective: 600px;
+}
+
+.night svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.night .desk {
+  fill: var(--night-deep);
+}
+
+.night .moon {
+  fill: var(--moon);
+}
+
+.night .moon-shadow {
+  fill: var(--night);
+}
+
+.night .star {
+  fill: var(--star);
+  opacity: 0.55;
+}
+
+.night .base {
+  fill: var(--metal);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+/* The lid folds shut on its hinge (bottom edge) instead of flattening in place. */
+.night .lid {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg);
+  transition: transform 650ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.night .lid-shell {
+  fill: var(--metal);
+  stroke: var(--metal-edge);
+  stroke-width: 1;
+}
+
+.night .screen {
+  fill: var(--screen-on);
+  transition: fill 350ms ease 300ms;
+}
+
+.night .cursor {
+  fill: var(--star);
+  opacity: 0.8;
+}
+
+.night .glow {
+  fill: var(--glow);
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+/* Lid closes when a session is running. */
+.night.is-asleep .lid {
+  transform: rotateX(90deg);
+}
+
+.night.is-asleep .screen {
+  fill: var(--screen-off);
+  transition-delay: 0ms;
+}
+
+.night.is-asleep .cursor {
+  opacity: 0;
+}
+
+.night.is-asleep .glow {
+  opacity: 0.35;
+}
+
+/* A soft thud as the lid lands on the base, timed to land once the lid is shut. */
+@keyframes thud {
+  0% {
+    transform: scaleY(1);
+  }
+  35% {
+    transform: scaleY(0.82);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.night.is-asleep .base {
+  animation: thud 260ms ease-out;
+  animation-delay: 520ms;
+}
+
+/* The agent is working: a slow breath of light under the lid. */
+.night.is-working .glow {
+  animation: breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.night.is-asleep .star.twinkle {
+  animation: twinkle 4s ease-in-out infinite;
+}
+
+.night.is-asleep .star.twinkle.late {
+  animation-delay: 1.7s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .night .lid,
+  .night .screen,
+  .night .glow {
+    transition: none;
+  }
+  .night.is-working .glow,
+  .night.is-asleep .star.twinkle,
+  .night.is-asleep .base {
+    animation: none;
+  }
+}
+
+body.reduce-motion .night .lid,
+body.reduce-motion .night .screen,
+body.reduce-motion .night .glow {
+  transition: none;
+}
+
+body.reduce-motion .night.is-working .glow,
+body.reduce-motion .night.is-asleep .star.twinkle,
+body.reduce-motion .night.is-asleep .base {
+  animation: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Headline area                                                        */
+/* ------------------------------------------------------------------ */
+
+.intro h1 {
+  margin: 0;
+  font-size: 1.32em;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.intro p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.notice {
+  border-left: 2px solid var(--bad);
+  padding: 6px 10px;
+  color: var(--fg);
+  background: var(--vscode-inputValidation-errorBackground, rgba(208, 73, 63, 0.08));
+}
+
+/* ------------------------------------------------------------------ */
+/* Section headings                                                     */
+/* ------------------------------------------------------------------ */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section > h2 {
+  margin: 0;
+  font-size: 0.92em;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 0.92em;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* Mode picker: a radio list, not a card grid                           */
+/* ------------------------------------------------------------------ */
+
+.modes {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.mode {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  column-gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-top: 1px solid var(--border);
+}
+
+.mode:first-child {
+  border-top: 0;
+}
+
+.mode:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.mode input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode .dot {
+  margin-top: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--vscode-checkbox-border, var(--muted));
+  display: grid;
+  place-items: center;
+}
+
+.mode .dot::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: scale(0);
+  transition: transform 120ms ease;
+}
+
+.mode input:checked + .dot {
+  border-color: var(--accent);
+}
+
+.mode input:checked + .dot::after {
+  transform: scale(1);
+}
+
+.mode input:focus-visible + .dot {
+  outline: 1px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.mode.is-selected {
+  background: var(--vscode-list-inactiveSelectionBackground, var(--surface));
+}
+
+.mode .title {
+  font-weight: 600;
+}
+
+.mode .hint {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.94em;
+}
+
+.durations {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 999px;
+  padding: 2px 10px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.chip:hover {
+  border-color: var(--focus);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                              */
+/* ------------------------------------------------------------------ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 9px 14px;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.btn-secondary {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.btn-wake {
+  width: 100%;
+  padding: 9px 14px;
+  font-weight: 600;
+  background: var(--moon);
+  color: #2a2350;
+}
+
+.btn-wake:hover:not(:disabled) {
+  background: #f6e3a8;
+}
+
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--vscode-textLink-foreground);
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--vscode-textLink-activeForeground);
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ */
+/* Switches and selects                                                 */
+/* ------------------------------------------------------------------ */
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch .track {
+  flex: none;
+  width: 30px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-checkbox-border, var(--border));
+  position: relative;
+  transition: background 140ms ease;
+}
+
+.switch .track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.switch input:checked + .track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch input:checked + .track::after {
+  transform: translateX(14px);
+  background: var(--accent-fg);
+}
+
+.switch input:focus-visible + .track {
+  outline: 1px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field > span {
+  color: var(--muted);
+  font-size: 0.94em;
+}
+
+select,
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'] {
+  width: 100%;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border, var(--border));
+  border-radius: 4px;
+  padding: 5px 8px;
+}
+
+select {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border-color: var(--vscode-dropdown-border, var(--border));
+}
+
+input::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+}
+
+/* ------------------------------------------------------------------ */
+/* Active session                                                       */
+/* ------------------------------------------------------------------ */
+
+.clock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.clock .label {
+  color: var(--muted);
+}
+
+.clock time {
+  font-size: 2.6em;
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock .when {
+  color: var(--muted);
+}
+
+.readings {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  row-gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.readings dt {
+  color: var(--muted);
+}
+
+.readings dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pulse {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.pulse.on {
+  background: var(--violet);
+  opacity: 1;
+  box-shadow: 0 0 0 0 var(--violet);
+  animation: ring 2s ease-out infinite;
+}
+
+@keyframes ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--violet) 60%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse.on {
+    animation: none;
+  }
+}
+
+body.reduce-motion .pulse.on {
+  animation: none;
+}
+
+.meter {
+  flex: 1;
+  max-width: 90px;
+  height: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fg) 14%, transparent);
+  overflow: hidden;
+}
+
+.meter > i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--ok);
+}
+
+.meter.warn > i {
+  background: var(--warn);
+}
+
+.meter.bad > i {
+  background: var(--bad);
+}
+
+.sub {
+  color: var(--muted);
+}
+
+.readings dd > span {
+  white-space: nowrap;
+}
+
+.section p.fine {
+  margin: 0;
+}
+
+.btn-wake + p.fine {
+  margin: -8px 0 0;
+}
+
+.summary-head + p.fine {
+  margin-top: -4px;
+}
+
+.fine {
+  color: var(--muted);
+  font-size: 0.92em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Last session                                                         */
+/* ------------------------------------------------------------------ */
+
+.summary-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  flex: none;
+  color: #fff;
+  background: var(--muted);
+}
+
+.badge.good {
+  background: var(--ok);
+}
+
+.badge.warn {
+  background: var(--warn);
+  color: #2b2100;
+}
+
+.badge.bad {
+  background: var(--bad);
+}
+
+.stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.stats div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats dt {
+  color: var(--muted);
+  font-size: 0.92em;
+}
+
+.stats dd {
+  margin: 0;
+  font-size: 1.08em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+details.timeline > summary {
+  cursor: pointer;
+  color: var(--muted);
+  list-style: none;
+}
+
+details.timeline > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.timeline > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  transition: transform 120ms ease;
+}
+
+details.timeline[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.timeline ol {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0 0 0 4px;
+}
+
+.timeline li {
+  display: grid;
+  grid-template-columns: 3.4em 12px 1fr;
+  column-gap: 8px;
+  align-items: start;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.timeline li time {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline li .node {
+  margin-top: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--violet) 55%, transparent);
+  position: relative;
+}
+
+.timeline li:not(:last-child) .node::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 9px;
+  width: 1px;
+  height: calc(100% + 10px);
+  background: var(--border);
+}
+
+.timeline li:last-child .node {
+  background: var(--violet);
+}
+
+/* ------------------------------------------------------------------ */
+/* E-mail                                                               */
+/* ------------------------------------------------------------------ */
+
+.email-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.email-line .state {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.providers {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 5.5em;
+  gap: 8px;
+}
+
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.check input {
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+
+.events {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.events legend {
+  padding: 0;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.94em;
+}
+
+.form .btn-primary {
+  width: auto;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.feedback {
+  font-size: 0.94em;
+}
+
+details.disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+details.disclosure > summary {
+  cursor: pointer;
+  color: var(--muted);
+  list-style: none;
+  font-size: 0.94em;
+}
+
+details.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.disclosure > summary::before {
+  content: '▸';
+  display: inline-block;
+  width: 1em;
+  transition: transform 120ms ease;
+}
+
+details.disclosure[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.notice-inline {
+  color: var(--accent);
+}
+
+.feedback.ok {
+  color: var(--ok);
+}
+
+.feedback.bad {
+  color: var(--bad);
+}
+
+.footer {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+hr.soft {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}

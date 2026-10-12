@@ -1,0 +1,11 @@
+**
+!dist/extension.js
+!helpers/**
+!media/**
+!l10n/**
+!package.json
+!package.nls*.json
+!README.md
+!README.pt-BR.md
+!CHANGELOG.md
+!LICENSE
