@@ -10,6 +10,13 @@
     "color": "#16142b",
     "theme": "dark"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/safiragomes/sleepwalker"
+  },
+  "bugs": {
+    "url": "https://github.com/safiragomes/sleepwalker/issues"
+  },
   "keywords": [
     "ai",
     "agents",
