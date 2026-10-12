@@ -2,7 +2,7 @@
   "name": "sleepwalker",
   "displayName": "Sleepwalker",
   "description": "%extension.description%",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "safira-moraes",
   "license": "MIT",
   "icon": "media/icon.png",

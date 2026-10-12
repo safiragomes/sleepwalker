@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Fixed: on laptops where Windows hides the "Lid close action" power setting, Sleepwalker failed to start with "Could not read the power setting". It now reads hidden settings too (`powercfg /qh`).
+
 ## 0.1.2
 
 - Simplified e-mail setup: the only thing asked up front is the e-mail that receives notifications. The sending account, password, provider, server and port are tucked under "Advanced", for the rare case the defaults don't fit.

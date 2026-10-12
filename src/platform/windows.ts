@@ -83,7 +83,8 @@ export class WindowsBackend implements PlatformBackend {
     const saved: SavedSetting[] = [];
     for (const s of POWER_SETTINGS) {
       try {
-        const values = parseAcDc(await this.powercfg(['/q', scheme, s.subgroup, s.setting]));
+        // /qh, not /q: many laptops hide the lid-close setting, and /q then prints only the scheme header.
+        const values = parseAcDc(await this.powercfg(['/qh', scheme, s.subgroup, s.setting]));
         saved.push({ key: s.key, subgroup: s.subgroup, setting: s.setting, ...values });
       } catch (error) {
         if (s.required) throw error;
